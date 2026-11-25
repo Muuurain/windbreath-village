@@ -411,7 +411,7 @@ func _build_pause_modal() -> void:
 	_add_pause_slider(pv, "落子音效", "sfx_volume", 0.80)
 
 	var rain_chk := CheckButton.new()
-	rain_chk.text = "细雨风铃白噪音"
+	rain_chk.text = "林间细雨白噪音"
 	rain_chk.add_theme_color_override("font_color", UiStyles.COL_TEXT)
 	rain_chk.button_pressed = bool(SaveManager.get_setting("rain_enabled", false))
 	rain_chk.toggled.connect(func(on: bool): SaveManager.set_setting("rain_enabled", on))

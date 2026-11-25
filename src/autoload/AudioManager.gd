@@ -68,15 +68,21 @@ func _start_ambient_loops() -> void:
 		_bgm_player.stream = s1
 		_bgm_player.play()
 
-	if ResourceLoader.exists("res://assets/audio/bgm/amb_brook_loop.ogg"):
-		var s2 := load("res://assets/audio/bgm/amb_brook_loop.ogg")
+	var brook_path := "res://assets/audio/bgm/amb_village_brook_wind_loop_v02.ogg"
+	if not ResourceLoader.exists(brook_path):
+		brook_path = "res://assets/audio/bgm/amb_brook_loop.ogg"
+	if ResourceLoader.exists(brook_path):
+		var s2 := load(brook_path)
 		if s2 is AudioStreamOggVorbis:
 			(s2 as AudioStreamOggVorbis).loop = true
 		_brook_player.stream = s2
 		_brook_player.play()
 
-	if ResourceLoader.exists("res://assets/audio/bgm/amb_rain_chime_loop.ogg"):
-		var s3 := load("res://assets/audio/bgm/amb_rain_chime_loop.ogg")
+	var rain_path := "res://assets/audio/bgm/amb_village_rain_breeze_loop_v02.ogg"
+	if not ResourceLoader.exists(rain_path):
+		rain_path = "res://assets/audio/bgm/amb_rain_chime_loop.ogg"
+	if ResourceLoader.exists(rain_path):
+		var s3 := load(rain_path)
 		if s3 is AudioStreamOggVorbis:
 			(s3 as AudioStreamOggVorbis).loop = true
 		_rain_player.stream = s3
@@ -88,9 +94,11 @@ func apply_volumes() -> void:
 	var amb_v := float(SaveManager.get_setting("amb_volume", 0.60))
 	var rain_on := bool(SaveManager.get_setting("rain_enabled", false))
 
+	# v02 ambients are already mastered ~11 dB below BGM (-29 LUFS vs -17.8 LUFS),
+	# so 0.68 / 0.62 multipliers preserve a warm ~10 dB background cushion under BGM.
 	_bgm_player.volume_db = -80.0 if bgm_v <= 0.01 else linear_to_db(bgm_v * 0.55)
-	_brook_player.volume_db = -80.0 if amb_v <= 0.01 else linear_to_db(amb_v * 0.45)
-	_rain_player.volume_db = -80.0 if (not rain_on or amb_v <= 0.01) else linear_to_db(amb_v * 0.48)
+	_brook_player.volume_db = -80.0 if amb_v <= 0.01 else linear_to_db(amb_v * 0.68)
+	_rain_player.volume_db = -80.0 if (not rain_on or amb_v <= 0.01) else linear_to_db(amb_v * 0.62)
 
 
 func _on_sfx_requested(sfx_id: String, pitch_jitter: float) -> void:

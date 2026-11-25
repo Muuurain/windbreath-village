@@ -5,6 +5,17 @@ All notable changes to **Windbreath Village (风息村落物语)** will be docum
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2026-11-25
+
+### Changed
+- **全套自然立体声环境音重制与混音融合 (`v02`)**：
+  - 切换常驻溪流微风轨至 `amb_village_brook_wind_loop_v02.ogg`（60 秒真立体声鹅卵石浅溪与远风竹叶，频谱质心约 `1073–1086 Hz`，`650–2600 Hz` 清泉水花占 `~57%`，`-28.9 LUFS`），彻底取代旧版程序粉噪导致的“收音机电流盲音”与低沉闷吼；
+  - 切换可选细雨陪衬轨至 `amb_village_rain_breeze_loop_v02.ogg`（60 秒真立体声木檐竹叶细雨，质心约 `1092–1101 Hz`，`500–3500 Hz` 占 `~81%`，`-29.2 LUFS`），去除冲突钟琴脉冲；
+  - 对两条 `v02` 环境音额外实施全长 `50 Hz` 倍频窄带净化与 `5 ms` 过零平滑，保证首尾无缝回绕与底噪洁净。
+- **混音平衡与界面文案同步**：
+  - 针对 `-29 LUFS` 轻柔环境底床校准 `AudioManager.gd` 增益比例（溪流 `amb_v * 0.68`、细雨 `amb_v * 0.62`），稳定保持在 `BGM_v02` 下方约 `10 dB` 的温暖护垫；
+  - 清理淘汰的旧版 `amb_brook_loop`、`amb_rain_chime_loop` 与未用 `v01` 运行时资源，同步更新设置与指南中的「林间细雨白噪音」文案及 `tests/TestSuite.gd` 全音轨加载回归断言。
+
 ## [1.2.0] - 2026-11-25
 
 ### Changed

@@ -56,8 +56,16 @@ func _test_catalog_and_assets() -> void:
 		_assert(ResourceLoader.exists(String(pc["image"])), "Postcard image exists: %s" % pc["id"])
 
 	_assert(ResourceLoader.exists("res://assets/audio/bgm/bgm_village_pastoral_loop_main_v02.ogg"), "Updated v02 pastoral BGM OGG exists")
+	_assert(ResourceLoader.exists("res://assets/audio/bgm/amb_village_brook_wind_loop_v02.ogg"), "Updated v02 brook & breeze ambient OGG exists")
+	_assert(ResourceLoader.exists("res://assets/audio/bgm/amb_village_rain_breeze_loop_v02.ogg"), "Updated v02 rain drizzle ambient OGG exists")
 	_assert(not ResourceLoader.exists("res://assets/audio/bgm/bgm_village_pastoral_loop_main_v01.ogg"), "Unused v01 BGM runtime file removed")
+	_assert(not ResourceLoader.exists("res://assets/audio/bgm/amb_brook_loop.ogg"), "Legacy static-hiss amb_brook_loop removed")
+	_assert(not ResourceLoader.exists("res://assets/audio/bgm/amb_rain_chime_loop.ogg"), "Legacy static-hiss amb_rain_chime_loop removed")
+	_assert(not ResourceLoader.exists("res://assets/audio/bgm/amb_village_brook_wind_loop_v01.ogg"), "Unused v01 brook ambient removed")
+	_assert(not ResourceLoader.exists("res://assets/audio/bgm/amb_village_rain_breeze_loop_v01.ogg"), "Unused v01 rain ambient removed")
 	_assert(AudioManager._bgm_player != null and AudioManager._bgm_player.stream != null, "AudioManager loads active v02 BGM stream")
+	_assert(AudioManager._brook_player != null and AudioManager._brook_player.stream != null, "AudioManager loads active v02 brook stream")
+	_assert(AudioManager._rain_player != null and AudioManager._rain_player.stream != null, "AudioManager loads active v02 rain stream")
 
 
 func _test_hex_math_and_rotation() -> void:

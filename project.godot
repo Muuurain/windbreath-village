@@ -12,7 +12,7 @@ config_version=5
 
 config/name="风息村落物语 Windbreath Village"
 config/description="慢节奏疗愈系田园六边形拼接 × 生态微循环经营手游：邻接协同、村民挑货、风物筑景、四季光影与明信片收集。"
-config/version="1.2.0"
+config/version="1.3.0"
 run/main_scene="res://src/scenes/Main.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
 config/icon="res://icon.svg"

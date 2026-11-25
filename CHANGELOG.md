@@ -5,6 +5,17 @@ All notable changes to **Windbreath Village (风息村落物语)** will be docum
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2026-11-25
+
+### Added
+- **5 步互动新手引导 (`src/ui/TutorialCoach.gd`)**：首次进入村落自动开启，根据玩家真实选牌旋转、预览空位、放置地块操作自动推进步骤，支持随时跳过或从指南/暂停界面重新开启。
+- **4 分页图文玩法说明弹窗 (`src/ui/GameplayGuideModal.gd`)**：在主菜单、图鉴页、局内顶部「玩法」按钮与暂停弹窗均可随时打开，涵盖「核心操作」「协同加分（双六边形配对图解）」「风物居民」「模式图鉴」四大模块，内置 `TouchScrollContainer` 滑动与一键开启互动引导入口。
+- **全手牌旋转边缘预览 (`src/ui/HexEdgePreview.gd`)**：提取共享微缩六边形边缘组件，所有手牌卡片在显示农田/建筑图标的同时实时渲染随旋转同步转动的蓝色溪流与米色石路接口。
+
+### Changed
+- 弹窗开启时自动屏蔽底层 `VillageWorld` 误触，并增强 `TouchScrollContainer` 跨 `CanvasLayer` 遮挡检测。
+- 扩展 `tests/TestSuite.gd` 覆盖 `GameplayGuideModal`、`TutorialCoach`、`HexEdgePreview` 与 `tutorial_seen` 持久化。
+
 ## [1.0.0] - 2026-11-25
 
 ### Added

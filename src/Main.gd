@@ -12,6 +12,7 @@ var _state: VillageState
 var _menu: MainMenu
 var _chapters: ChapterSelectScreen
 var _almanac: AlmanacScreen
+var _guide: GameplayGuideModal
 var _active_tile_id: String = ""
 var _active_mode: String = "hand" # "hand" | "wonder"
 var _active_hand_idx: int = 0
@@ -34,7 +35,8 @@ func _instantiate_menus() -> void:
 	_menu = MainMenu.new()
 	_chapters = ChapterSelectScreen.new()
 	_almanac = AlmanacScreen.new()
-	for w in [_menu, _chapters, _almanac]:
+	_guide = GameplayGuideModal.new()
+	for w in [_menu, _chapters, _almanac, _guide]:
 		ui_layer.add_child(w)
 
 
@@ -49,10 +51,13 @@ func _connect_signals() -> void:
 		_menu.visible = false
 		_almanac.open()
 	)
+	_menu.open_guide_requested.connect(func(): _guide.open(0))
 
 	_chapters.back_requested.connect(_show_menu)
 	_chapters.chapter_selected.connect(_start_chapter)
 	_almanac.back_requested.connect(_show_menu)
+	_almanac.open_guide_requested.connect(func(): _guide.open(0))
+	_guide.replay_tutorial_requested.connect(_on_replay_tutorial)
 
 	hud.hand_selected.connect(_on_hand_selected)
 	hud.hand_cycled.connect(_on_hand_cycled)
@@ -66,7 +71,11 @@ func _connect_signals() -> void:
 	hud.next_chapter_requested.connect(_start_chapter)
 	hud.restart_chapter_requested.connect(_on_restart_session)
 	hud.exit_menu_requested.connect(_on_exit_to_menu)
+	hud.guide_requested.connect(func(): _guide.open(0))
+	hud.tutorial_replay_requested.connect(func(): hud.start_tutorial())
 
+	world.input_blocked = func() -> bool:
+		return hud.is_modal_open() or _guide.visible
 	world.slot_previewed.connect(_on_slot_previewed)
 	world.slot_confirmed.connect(_on_slot_confirmed)
 	world.mood_applied.connect(_on_mood_applied)
@@ -93,6 +102,7 @@ func _show_menu() -> void:
 	hud.visible = false
 	_chapters.visible = false
 	_almanac.visible = false
+	_guide.visible = false
 	_menu.refresh_ui()
 	_menu.visible = true
 	_on_mood_applied("afternoon")
@@ -127,6 +137,7 @@ func _enter_world() -> void:
 	_menu.visible = false
 	_chapters.visible = false
 	_almanac.visible = false
+	_guide.visible = false
 	world.visible = true
 	hud.visible = true
 
@@ -138,7 +149,17 @@ func _enter_world() -> void:
 	world.bind_state(_state)
 	world.set_active_placement(_active_tile_id, _active_rot)
 	hud.bind_state(_state)
+	if not SaveManager.is_tutorial_seen():
+		hud.start_tutorial()
 	SaveManager.save_session(_state)
+
+
+func _on_replay_tutorial() -> void:
+	if world.visible and _state != null:
+		hud.start_tutorial()
+	else:
+		_start_chapter("ch_01")
+		hud.start_tutorial()
 
 
 func _on_hand_selected(idx: int) -> void:
@@ -149,6 +170,7 @@ func _on_hand_selected(idx: int) -> void:
 	_active_tile_id = _state.hand[idx]
 	EventBus.sfx_requested.emit("sfx_tile_select", 0.05)
 	world.set_active_placement(_active_tile_id, _active_rot)
+	hud.notify_tutorial_hand()
 
 
 func _on_hand_cycled(idx: int) -> void:
@@ -158,6 +180,7 @@ func _on_hand_cycled(idx: int) -> void:
 	if _active_mode == "hand" and _active_hand_idx == idx:
 		_active_tile_id = _state.hand[idx]
 		world.set_active_placement(_active_tile_id, _active_rot)
+	hud.notify_tutorial_hand()
 	SaveManager.save_session(_state)
 
 
@@ -173,11 +196,13 @@ func _on_rotate() -> void:
 	EventBus.sfx_requested.emit("sfx_tile_rotate", 0.08)
 	hud.set_active_rot(_active_rot)
 	world.set_active_placement(_active_tile_id, _active_rot)
+	hud.notify_tutorial_hand()
 
 
 func _on_slot_previewed(_q: int, _r: int, preview: Dictionary) -> void:
 	var tname := String(GameData.get_tile(_active_tile_id).get("name", ""))
 	hud.show_preview_info(tname, preview)
+	hud.notify_tutorial_preview()
 
 
 func _on_slot_confirmed(q: int, r: int) -> void:
@@ -211,6 +236,7 @@ func _on_slot_confirmed(q: int, r: int) -> void:
 
 	world.sync_after_placement(q, r)
 	hud.hide_preview()
+	hud.notify_tutorial_placed()
 
 	# Reset to hand mode smoothly after crafting a wonder
 	if _active_mode == "wonder":

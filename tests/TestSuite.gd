@@ -133,8 +133,18 @@ func _test_chapter_completion_and_persistence() -> void:
 	_assert(loaded_zen != null and loaded_zen.mode == "zen" and loaded_zen.mood_id == "night", "Zen village mode & mood persisted cleanly")
 	SaveManager.clear_zen_save()
 
+	var orig_tut := SaveManager.is_tutorial_seen()
+	SaveManager.set_tutorial_seen(false)
+	_assert(not SaveManager.is_tutorial_seen(), "Tutorial seen flag can reset to false")
+	SaveManager.set_tutorial_seen(true)
+	_assert(SaveManager.is_tutorial_seen(), "Tutorial seen flag persists true")
+	SaveManager.set_tutorial_seen(orig_tut)
+
 
 func _test_full_ui_and_touch_scroll() -> void:
+	var orig_tut := SaveManager.is_tutorial_seen()
+	SaveManager.set_tutorial_seen(false)
+
 	get_tree().root.size = Vector2i(720, 1280)
 	var scene := load("res://src/scenes/Main.tscn") as PackedScene
 	_assert(scene != null, "Main.tscn loads cleanly")
@@ -144,6 +154,33 @@ func _test_full_ui_and_touch_scroll() -> void:
 	await get_tree().process_frame
 
 	_assert(inst._menu.visible, "MainMenu starts visible")
+
+	# Test GameplayGuideModal entry from MainMenu, all 4 tabs, and TouchScrollContainer drag
+	var guide_btn := inst._menu.find_child("GuideButton", true, false) as Button
+	_assert(guide_btn != null, "MainMenu exposes GuideButton")
+	if guide_btn != null:
+		guide_btn.pressed.emit()
+		await get_tree().process_frame
+		await get_tree().process_frame
+		_assert(inst._guide.visible, "GameplayGuideModal opens from MainMenu")
+		for tab_i in range(4):
+			inst._guide.switch_tab(tab_i)
+			await get_tree().process_frame
+			_assert(inst._guide._content_box.get_child_count() >= 3, "Guide tab %d populates visual content cards" % tab_i)
+		inst._guide.switch_tab(2)
+		await get_tree().process_frame
+		await get_tree().process_frame
+		if inst._guide._scroll != null and inst._guide._content_box.get_child_count() > 1:
+			var g_scroll := inst._guide._scroll
+			_assert(g_scroll.get_v_scroll_bar().max_value > g_scroll.size.y, "Guide tab 2 overflows vertically for scrolling")
+			g_scroll.scroll_vertical = 0
+			var g_card := inst._guide._content_box.get_child(1) as Control
+			var gp := g_card.get_global_rect().get_center()
+			await _simulate_touch_drag(gp, gp + Vector2(0, -180), 8)
+			_assert(g_scroll.scroll_vertical > 20, "Touch drag over guide cards scrolls GameplayGuideModal (%d)" % g_scroll.scroll_vertical)
+		inst._guide.close_modal()
+		await get_tree().process_frame
+		_assert(not inst._guide.visible, "GameplayGuideModal closes cleanly")
 
 	# Test ChapterSelectScreen vertical TouchScrollContainer drag directly on a chapter Button
 	inst._menu.visible = false
@@ -175,11 +212,19 @@ func _test_full_ui_and_touch_scroll() -> void:
 	_assert(inst._almanac.visible, "AlmanacScreen opens cleanly")
 	inst._almanac.visible = false
 
-	# Start Chapter 1 live world + HUD + mood switch + preview + placement
+	# Start Chapter 1 live world + HUD + TutorialCoach + mood switch + preview + placement
 	inst._start_chapter("ch_01")
 	await get_tree().process_frame
 	await get_tree().process_frame
 	_assert(inst.world.visible and inst.hud.visible, "World and HUD appear when starting chapter")
+	_assert(inst.hud.is_tutorial_active() and inst.hud.get_tutorial_step() == 0, "TutorialCoach starts automatically on first Ch1 entry")
+
+	# Verify hand cards expose HexEdgePreview for all tile types
+	var hex_prev_count := 0
+	for n in inst.hud._hand_box.find_children("*", "", true, false):
+		if n is HexEdgePreview:
+			hex_prev_count += 1
+	_assert(hex_prev_count == inst._state.hand.size(), "All hand cards render HexEdgePreview (%d/%d)" % [hex_prev_count, inst._state.hand.size()])
 
 	# Test horizontal Wonder Craft TouchScrollContainer drag on Wonder Button
 	inst.hud._dock_tab = 1
@@ -194,9 +239,14 @@ func _test_full_ui_and_touch_scroll() -> void:
 		await _simulate_touch_drag(wp, wp + Vector2(-170, 0), 8)
 		_assert(wscroll.scroll_horizontal > 20, "Horizontal drag on Wonder card scrolls Wonder bar (%d)" % wscroll.scroll_horizontal)
 
-	# Switch back to Hand, preview & confirm slot (-1, 0), cycle mood afternoon -> sunset -> night
+	# Switch back to Hand, advance interactive TutorialCoach via real actions
 	inst.hud._dock_tab = 0
 	inst.hud._refresh_dock()
+	inst.hud._tutorial_coach._on_next()
+	_assert(inst.hud.get_tutorial_step() == 1, "TutorialCoach advances from step 0 -> 1")
+	inst._on_rotate()
+	_assert(inst.hud.get_tutorial_step() == 2, "Rotating hand card auto-advances TutorialCoach to step 2")
+
 	inst._on_cycle_mood()
 	_assert(inst._state.mood_id == "sunset", "Mood cycles cleanly from afternoon -> sunset")
 	inst._on_cycle_mood()
@@ -204,10 +254,24 @@ func _test_full_ui_and_touch_scroll() -> void:
 
 	inst.world._refresh_preview_at(Vector2i(-1, 0))
 	_assert(inst.world.has_active_preview(), "Preview highlights valid slot (-1, 0)")
+	_assert(inst.hud.get_tutorial_step() == 3, "Previewing empty slot auto-advances TutorialCoach to step 3")
 	inst._on_confirm_place()
 	_assert(inst._state.board.size() == 4, "Confirming preview places tile onto board")
+	_assert(inst.hud.get_tutorial_step() == 4, "Confirming placement auto-advances TutorialCoach to final step 4")
+	inst.hud._tutorial_coach._on_next()
+	_assert(not inst.hud.is_tutorial_active() and SaveManager.is_tutorial_seen(), "Completing TutorialCoach persists tutorial_seen = true")
+
+	# Verify HUD guide opens cleanly on UiLayer above GameHud
+	var hud_guide_btn := inst.hud.find_child("HudGuideButton", true, false) as Button
+	_assert(hud_guide_btn != null, "GameHud exposes HudGuideButton")
+	if hud_guide_btn != null:
+		hud_guide_btn.pressed.emit()
+		await get_tree().process_frame
+		_assert(inst._guide.visible and inst.world.input_blocked.call(), "Opening GameplayGuideModal from HUD blocks world input")
+		inst._guide.close_modal()
 
 	SaveManager.clear_chapter_resume()
+	SaveManager.set_tutorial_seen(orig_tut)
 	inst.queue_free()
 	await get_tree().process_frame
 

@@ -39,6 +39,10 @@
 - **四种昼夜光影 × 多轨白噪音混音**
   - 一键切换 **晨曦薄雾 / 午后暖阳 / 落日余晖 / 萤火夏夜**（夜间纸灯笼暖光透窗、萤火虫飞舞）。
   - 独立调节 **田园卡林巴配乐**、**溪流风声**、**细雨风铃白噪音** 与触感震动反馈。
+- **新手引导与完整玩法图解 (`v1.1.0`)**
+  - **5 步互动新手引导 (`TutorialCoach`)**：首次进入村落自动开启，跟随「认识目标 → 选牌与旋转 → 点击空位预览 → 确认放置 → 协同口诀」实时操作推进，支持随时跳过或从暂停/指南重温。
+  - **4 分页图文《玩法说明》(`GameplayGuideModal`)**：在主菜单、风物图鉴、局内顶部与暂停界面均可打开，含「核心操作」「协同加分（双六边形对照图解）」「风物与居民」「模式图鉴」四大分页。
+  - **行囊地形接口实时预览 (`HexEdgePreview`)**：全部手牌实时显示微缩景物与随旋转同步转动的蓝色溪流/米色石路边线。
 - **移动端竖屏触控优化**
   - 单指拖动平移、双指捏合缩放、点击预览协同连线后二次确认落子（支持 1 步撤回与行囊换牌）。
   - 内置 `TouchScrollContainer` 确保手势在图标、卡片和按钮上直接滑动也能流畅滚动不误触。
@@ -62,7 +66,7 @@ windbreath_village/
 │   ├── autoload/            # EventBus / GameData / SaveManager / AudioManager
 │   ├── core/                # 纯逻辑层 (HexMath / EcosystemEngine / VillageState)
 │   ├── world/               # 2.5D 地块节点 / 村民动物巡游 / 交互相机世界 (VillageWorld)
-│   ├── ui/                  # TouchScrollContainer / UiStyles / MainMenu / ChapterSelect / Almanac / GameHud
+│   ├── ui/                  # TouchScrollContainer / HexEdgePreview / GameplayGuideModal / TutorialCoach / UiStyles / MainMenu / ChapterSelect / Almanac / GameHud
 │   ├── scenes/              # Main.tscn
 │   └── Main.gd              # 根场景调度器
 ├── tests/                   # 自动化单元测试与主场景集成测试 (TestSuite.gd)
@@ -78,12 +82,12 @@ windbreath_village/
 ## 快速开始与构建
 
 ### 1. 直接下载游玩
-前往本仓库 [Releases](https://github.com/Muuurain/windbreath-village/releases) 下载最新发行包：
+前往本仓库 [Releases](https://github.com/Muuurain/windbreath-village/releases) 下载最新发行包（当前最新 **`v1.1.0`**）：
 - **Android 手机**：下载 `windbreath_village_debug.apk` 安装游玩，或通过 ADB 安装：
   ```bash
   adb install -r windbreath_village_debug.apk
   ```
-- **Windows 桌面**：下载 `WindbreathVillage-v1.0.0-win64.zip` 解压后运行 `windbreath_village_win64.exe`。
+- **Windows 桌面**：下载 `WindbreathVillage-v1.1.0-win64.zip` 解压后运行 `windbreath_village_win64.exe`。
 
 ### 2. 源码运行与自动化测试
 使用 **Godot 4.7.2** 打开根目录 `project.godot` 即可运行，或通过命令行运行测试与导出：

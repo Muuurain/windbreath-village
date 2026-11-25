@@ -154,6 +154,10 @@ func _is_blocked_by_overlay(pos: Vector2) -> bool:
 			var sib := parent.get_child(i)
 			if sib is Control and _control_blocks_at(sib as Control, pos):
 				return true
+			elif sib is CanvasLayer and (sib as CanvasLayer).visible:
+				for lc in sib.get_children():
+					if lc is Control and _control_blocks_at(lc as Control, pos):
+						return true
 		cur = parent
 	return false
 

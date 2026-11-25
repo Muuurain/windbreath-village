@@ -7,6 +7,7 @@ signal resume_chapter_requested()
 signal open_chapters_requested()
 signal open_zen_requested()
 signal open_almanac_requested()
+signal open_guide_requested()
 
 var _progress_lbl: Label
 var _resume_btn: Button
@@ -177,14 +178,33 @@ func _build_ui() -> void:
 	)
 	v.add_child(_zen_btn)
 
+	var bot_row := HBoxContainer.new()
+	bot_row.add_theme_constant_override("separation", 10)
+	v.add_child(bot_row)
+
+	var guide_btn := Button.new()
+	guide_btn.name = "GuideButton"
+	guide_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	guide_btn.text = "玩法说明与教程"
+	UiStyles.style_button(guide_btn, UiStyles.COL_GOLD, true, 56.0)
+	guide_btn.add_theme_font_size_override("font_size", 18)
+	guide_btn.pressed.connect(func():
+		EventBus.sfx_requested.emit("sfx_ui_click", 0.0)
+		open_guide_requested.emit()
+	)
+	bot_row.add_child(guide_btn)
+
 	var alm_btn := Button.new()
-	alm_btn.text = "风物图鉴 · 居民故事 & 明信片册"
+	alm_btn.name = "AlmanacButton"
+	alm_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	alm_btn.text = "风物图鉴 · 明信片"
 	UiStyles.style_button(alm_btn, UiStyles.COL_WOOD, false, 56.0)
+	alm_btn.add_theme_font_size_override("font_size", 18)
 	alm_btn.pressed.connect(func():
 		EventBus.sfx_requested.emit("sfx_ui_click", 0.0)
 		open_almanac_requested.emit()
 	)
-	v.add_child(alm_btn)
+	bot_row.add_child(alm_btn)
 
 	_build_settings_modal()
 

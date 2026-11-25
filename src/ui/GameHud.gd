@@ -16,6 +16,8 @@ signal mood_cycle_requested()
 signal next_chapter_requested(next_ch_id: String)
 signal restart_chapter_requested()
 signal exit_menu_requested()
+signal guide_requested()
+signal tutorial_replay_requested()
 
 var _state: VillageState
 var _selected_mode: String = "hand" # "hand" | "wonder"
@@ -24,6 +26,7 @@ var _selected_wonder_id: String = ""
 var _active_rot: int = 0
 var _dock_tab: int = 0 # 0=hand, 1=wonders
 var _clean_view: bool = false
+var _tutorial_coach: TutorialCoach
 
 var _root: Control
 var _chrome_box: Control
@@ -117,7 +120,7 @@ func _build_ui() -> void:
 
 	var menu_btn := Button.new()
 	menu_btn.text = "菜单"
-	menu_btn.custom_minimum_size = Vector2(72, 40)
+	menu_btn.custom_minimum_size = Vector2(64, 40)
 	UiStyles.style_button(menu_btn, UiStyles.COL_WOOD, false, 40.0)
 	menu_btn.add_theme_font_size_override("font_size", 15)
 	menu_btn.pressed.connect(func():
@@ -134,9 +137,21 @@ func _build_ui() -> void:
 	_title_lbl.add_theme_color_override("font_color", UiStyles.COL_TEXT)
 	r1.add_child(_title_lbl)
 
+	var guide_btn := Button.new()
+	guide_btn.name = "HudGuideButton"
+	guide_btn.text = "玩法"
+	guide_btn.custom_minimum_size = Vector2(64, 40)
+	UiStyles.style_button(guide_btn, UiStyles.COL_GOLD, true, 40.0)
+	guide_btn.add_theme_font_size_override("font_size", 14)
+	guide_btn.pressed.connect(func():
+		EventBus.sfx_requested.emit("sfx_ui_click", 0.0)
+		guide_requested.emit()
+	)
+	r1.add_child(guide_btn)
+
 	_mood_btn = Button.new()
 	_mood_btn.text = "午后暖阳"
-	_mood_btn.custom_minimum_size = Vector2(96, 40)
+	_mood_btn.custom_minimum_size = Vector2(92, 40)
 	UiStyles.style_button(_mood_btn, UiStyles.COL_GOLD, false, 40.0)
 	_mood_btn.add_theme_font_size_override("font_size", 14)
 	_mood_btn.pressed.connect(func():
@@ -147,7 +162,7 @@ func _build_ui() -> void:
 
 	var clean_btn := Button.new()
 	clean_btn.text = "赏景"
-	clean_btn.custom_minimum_size = Vector2(68, 40)
+	clean_btn.custom_minimum_size = Vector2(62, 40)
 	UiStyles.style_button(clean_btn, UiStyles.COL_BROOK, false, 40.0)
 	clean_btn.add_theme_font_size_override("font_size", 14)
 	clean_btn.pressed.connect(func(): _set_clean_view(true))
@@ -336,6 +351,11 @@ func _build_ui() -> void:
 	_wonder_box.add_theme_constant_override("separation", 8)
 	_wonder_scroll.add_child(_wonder_box)
 
+	_tutorial_coach = TutorialCoach.new()
+	_tutorial_coach.tutorial_finished.connect(func(): SaveManager.set_tutorial_seen(true))
+	_tutorial_coach.tutorial_skipped.connect(func(): SaveManager.set_tutorial_seen(true))
+	_chrome_box.add_child(_tutorial_coach)
+
 	_build_pause_modal()
 	_build_clear_modal()
 
@@ -368,10 +388,10 @@ func _build_pause_modal() -> void:
 
 	_pause_modal = PanelContainer.new()
 	_pause_modal.set_anchors_preset(Control.PRESET_CENTER)
-	_pause_modal.offset_left = -265
-	_pause_modal.offset_right = 265
-	_pause_modal.offset_top = -265
-	_pause_modal.offset_bottom = 265
+	_pause_modal.offset_left = -275
+	_pause_modal.offset_right = 275
+	_pause_modal.offset_top = -310
+	_pause_modal.offset_bottom = 310
 	_pause_modal.add_theme_stylebox_override("panel", UiStyles.make_panel_style(UiStyles.COL_PANEL, UiStyles.COL_SAGE, 20, 3))
 	_pause_backdrop.add_child(_pause_modal)
 
@@ -380,9 +400,9 @@ func _build_pause_modal() -> void:
 	_pause_modal.add_child(pv)
 
 	var t := Label.new()
-	t.text = "休憩与音画设置"
+	t.text = "休憩、玩法与音画设置"
 	t.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	t.add_theme_font_size_override("font_size", 24)
+	t.add_theme_font_size_override("font_size", 23)
 	t.add_theme_color_override("font_color", UiStyles.COL_TEXT)
 	pv.add_child(t)
 
@@ -396,6 +416,34 @@ func _build_pause_modal() -> void:
 	rain_chk.button_pressed = bool(SaveManager.get_setting("rain_enabled", false))
 	rain_chk.toggled.connect(func(on: bool): SaveManager.set_setting("rain_enabled", on))
 	pv.add_child(rain_chk)
+
+	var help_h := HBoxContainer.new()
+	help_h.add_theme_constant_override("separation", 8)
+	pv.add_child(help_h)
+
+	var p_guide_btn := Button.new()
+	p_guide_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	p_guide_btn.text = "玩法说明图解"
+	UiStyles.style_button(p_guide_btn, UiStyles.COL_GOLD, true, 46.0)
+	p_guide_btn.add_theme_font_size_override("font_size", 15)
+	p_guide_btn.pressed.connect(func():
+		EventBus.sfx_requested.emit("sfx_ui_click", 0.0)
+		_pause_backdrop.visible = false
+		guide_requested.emit()
+	)
+	help_h.add_child(p_guide_btn)
+
+	var p_tut_btn := Button.new()
+	p_tut_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	p_tut_btn.text = "重温互动引导"
+	UiStyles.style_button(p_tut_btn, UiStyles.COL_BROOK, true, 46.0)
+	p_tut_btn.add_theme_font_size_override("font_size", 15)
+	p_tut_btn.pressed.connect(func():
+		EventBus.sfx_requested.emit("sfx_ui_click", 0.0)
+		_pause_backdrop.visible = false
+		tutorial_replay_requested.emit()
+	)
+	help_h.add_child(p_tut_btn)
 
 	var res_btn := Button.new()
 	res_btn.text = "继续游玩"
@@ -527,6 +575,8 @@ func bind_state(state: VillageState) -> void:
 	_preview_bar.visible = false
 	_clear_backdrop.visible = false
 	_pause_backdrop.visible = false
+	if _tutorial_coach != null:
+		_tutorial_coach.stop_tutorial()
 	_set_clean_view(false)
 	refresh_all()
 
@@ -603,22 +653,10 @@ func _refresh_dock() -> void:
 		top_btn.add_child(inner_v)
 
 		var ptex := String(tdef.get("prop_tex", ""))
-		if ptex.is_empty():
-			var mini := _MiniEdgeHexPreview.new(tdef.get("edges", []), _active_rot if is_sel else 0, bool(tdef.get("is_water", false)))
-			mini.custom_minimum_size = Vector2(56, 48)
-			mini.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-			mini.mouse_filter = Control.MOUSE_FILTER_IGNORE
-			inner_v.add_child(mini)
-		else:
-			var ic := TextureRect.new()
-			if ResourceLoader.exists(ptex):
-				ic.texture = load(ptex)
-			ic.custom_minimum_size = Vector2(48, 48)
-			ic.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-			ic.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-			ic.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-			ic.mouse_filter = Control.MOUSE_FILTER_IGNORE
-			inner_v.add_child(ic)
+		var mini := HexEdgePreview.new(tdef.get("edges", []), _active_rot if is_sel else 0, bool(tdef.get("is_water", false)), ptex, is_sel)
+		mini.custom_minimum_size = Vector2(64, 52)
+		mini.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+		inner_v.add_child(mini)
 
 		var nl := Label.new()
 		nl.text = String(tdef.get("name", ""))
@@ -797,43 +835,41 @@ func show_chapter_clear(ch_id: String, postcard_id: String) -> void:
 	UiStyles.animate_pop_in(_clear_modal)
 
 
+func is_modal_open() -> bool:
+	return (_pause_backdrop != null and _pause_backdrop.visible) or (_clear_backdrop != null and _clear_backdrop.visible)
+
+
+func start_tutorial() -> void:
+	if _tutorial_coach != null:
+		_set_clean_view(false)
+		_tutorial_coach.start_tutorial()
+
+
+func is_tutorial_active() -> bool:
+	return _tutorial_coach != null and _tutorial_coach.is_active()
+
+
+func get_tutorial_step() -> int:
+	return _tutorial_coach.get_step() if _tutorial_coach != null else -1
+
+
+func notify_tutorial_hand() -> void:
+	if _tutorial_coach != null:
+		_tutorial_coach.notify_hand_action()
+
+
+func notify_tutorial_preview() -> void:
+	if _tutorial_coach != null:
+		_tutorial_coach.notify_slot_previewed()
+
+
+func notify_tutorial_placed() -> void:
+	if _tutorial_coach != null:
+		_tutorial_coach.notify_tile_placed()
+
+
 func _process(delta: float) -> void:
 	if _toast_timer > 0.0:
 		_toast_timer -= delta
 		if _toast_timer <= 0.0:
 			_toast_panel.visible = false
-
-
-class _MiniEdgeHexPreview extends Control:
-	var _edges: Array[String]
-	var _is_water: bool
-
-	func _init(base_edges: Array, rot: int, is_water: bool) -> void:
-		_edges = HexMath.rotated_edges(base_edges, rot)
-		_is_water = is_water
-
-	func _draw() -> void:
-		var c := size * 0.5
-		var rad := minf(size.x * 0.44, size.y * 0.46)
-		var pts := HexMath.hex_polygon(rad)
-		var poly := PackedVector2Array()
-		for p in pts:
-			poly.append(c + p)
-		draw_colored_polygon(poly, Color(0.54, 0.80, 0.64) if _is_water else Color(0.60, 0.82, 0.60))
-		poly.append(poly[0])
-		draw_polyline(poly, Color(0.32, 0.55, 0.40), 1.8, true)
-
-		var r_pts: Array[Vector2] = []
-		var p_pts: Array[Vector2] = []
-		for i in range(6):
-			var mp := c + HexMath.edge_midpoint(i, rad)
-			if _edges[i] == "river":
-				r_pts.append(mp)
-			elif _edges[i] == "road":
-				p_pts.append(mp)
-		for rp in r_pts:
-			draw_line(c, rp, Color(0.36, 0.78, 0.90), 6.5, true)
-		if not r_pts.is_empty():
-			draw_circle(c, 3.6, Color(0.36, 0.78, 0.90))
-		for pp in p_pts:
-			draw_line(c, pp, Color(0.92, 0.84, 0.66), 4.5, true)

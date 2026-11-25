@@ -21,6 +21,7 @@ func _default_meta() -> Dictionary:
 		"unlocked_residents": [],
 		"total_tiles_placed": 0,
 		"best_zen_harmony": 0,
+		"tutorial_seen": false,
 		"settings": {
 			"bgm_volume": 0.65,
 			"amb_volume": 0.60,
@@ -149,3 +150,12 @@ func clear_chapter_resume() -> void:
 func clear_zen_save() -> void:
 	if FileAccess.file_exists(ZEN_PATH):
 		DirAccess.remove_absolute(ProjectSettings.globalize_path(ZEN_PATH))
+
+
+func is_tutorial_seen() -> bool:
+	return bool(meta_data.get("tutorial_seen", false))
+
+
+func set_tutorial_seen(seen: bool = true) -> void:
+	meta_data["tutorial_seen"] = seen
+	save_meta()

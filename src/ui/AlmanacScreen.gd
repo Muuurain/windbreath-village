@@ -4,6 +4,7 @@ extends Control
 ## and all 15 placeable/craftable Tile & Wonder synergy references.
 
 signal back_requested()
+signal open_guide_requested()
 
 var _list_box: VBoxContainer
 
@@ -49,9 +50,20 @@ func _build_ui() -> void:
 	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title.text = "风物图鉴与明信片册"
-	title.add_theme_font_size_override("font_size", 25)
+	title.add_theme_font_size_override("font_size", 24)
 	title.add_theme_color_override("font_color", UiStyles.COL_TEXT)
 	top_h.add_child(title)
+
+	var guide_btn := Button.new()
+	guide_btn.text = "玩法说明"
+	guide_btn.custom_minimum_size = Vector2(96, 48)
+	UiStyles.style_button(guide_btn, UiStyles.COL_GOLD, true, 48.0)
+	guide_btn.add_theme_font_size_override("font_size", 15)
+	guide_btn.pressed.connect(func():
+		EventBus.sfx_requested.emit("sfx_ui_click", 0.0)
+		open_guide_requested.emit()
+	)
+	top_h.add_child(guide_btn)
 
 	var scroll := TouchScrollContainer.new()
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL

@@ -37,6 +37,7 @@ var _pan_last_screen: Vector2 = Vector2.ZERO
 var _pinch_last_dist: float = 0.0
 var _tick_timer: float = 0.0
 var _floating_texts: Array[Dictionary] = []
+var input_blocked: Callable = Callable()
 
 
 func _ready() -> void:
@@ -251,6 +252,8 @@ func _process(delta: float) -> void:
 
 func _unhandled_input(event: InputEvent) -> void:
 	if not is_visible_in_tree():
+		return
+	if input_blocked.is_valid() and bool(input_blocked.call()):
 		return
 
 	if event is InputEventScreenTouch:

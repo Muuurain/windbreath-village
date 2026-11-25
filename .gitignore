@@ -1,0 +1,35 @@
+# Godot 4 engine caches and local build outputs
+.godot/
+.mono/
+data_*/
+mono_crash.*.json
+*.translation
+
+# Godot Android/iOS build templates
+android/
+
+# Compiled binaries and release artifacts (published via GitHub Releases)
+build/*.apk
+build/*.aab
+build/*.exe
+build/*.pck
+build/*.idsig
+build/*.zip
+
+# Raw uncropped generator sheets
+assets/art/raw/*.png
+assets/art/raw/*.jpg
+
+# Python caches
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# IDE & OS metadata
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+desktop.ini

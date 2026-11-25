@@ -1,0 +1,10 @@
+name: Feature Request
+description: Suggest new tiles, residents, or cozy chapters
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: idea
+    attributes:
+      label: Describe your cozy idea
+    validations:
+      required: true

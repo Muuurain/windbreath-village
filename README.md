@@ -57,9 +57,10 @@
 windbreath_village/
 ├── assets/
 │   ├── art/                 # 39 张处理后透明精灵、六边形地砖、UI 图标、主视觉与明信片
-│   ├── audio/               # 3 首无缝循环 BGM/白噪音与 10 个柔和木质/五声调音效 (.ogg)
+│   ├── audio/               # 80s 温暖原声无缝循环主配乐 (v02)、环境白噪音与 10 个柔和音效 (.ogg)
 │   └── shaders/             # 水波闪烁、微风轻拂摇曳、暖光灯笼着色器
 ├── docs/
+│   ├── audio_prompts/       # 音乐生成提示词规范 (v01/v02) 与实测验收回执
 │   ├── GAME_DESIGN.md       # 生态协同公式、风物地标与关卡设计文档
 │   └── ARCHITECTURE.md      # 分层架构与移动端性能优化说明
 ├── src/
@@ -82,12 +83,12 @@ windbreath_village/
 ## 快速开始与构建
 
 ### 1. 直接下载游玩
-前往本仓库 [Releases](https://github.com/Muuurain/windbreath-village/releases) 下载最新发行包（当前最新 **`v1.1.0`**）：
+前往本仓库 [Releases](https://github.com/Muuurain/windbreath-village/releases) 下载最新发行包（当前最新 **`v1.2.0`**）：
 - **Android 手机**：下载 `windbreath_village_debug.apk` 安装游玩，或通过 ADB 安装：
   ```bash
   adb install -r windbreath_village_debug.apk
   ```
-- **Windows 桌面**：下载 `WindbreathVillage-v1.1.0-win64.zip` 解压后运行 `windbreath_village_win64.exe`。
+- **Windows 桌面**：下载 `WindbreathVillage-v1.2.0-win64.zip` 解压后运行 `windbreath_village_win64.exe`。
 
 ### 2. 源码运行与自动化测试
 使用 **Godot 4.7.2** 打开根目录 `project.godot` 即可运行，或通过命令行运行测试与导出：

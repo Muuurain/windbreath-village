@@ -5,6 +5,17 @@ All notable changes to **Windbreath Village (风息村落物语)** will be docum
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2026-11-25
+
+### Changed
+- **背景音乐音质升级至 `v02` (`bgm_village_pastoral_loop_main_v02.ogg`)**：
+  - 切换 `AudioManager.gd` 主背景音轨至 80 秒（`72 BPM / 4/4 / F 大调`）原声室内乐 `v02` 版本，频谱质心由初版 `259 Hz` 提升至约 `520 Hz`（`500–2500 Hz` 原声主体占比 >40%），告别沉闷低频堆积与刺耳合成高频；
+  - 对循环尾部施以 `5 ms` 过零平滑与 Tail-Wrap 无缝衔接，消除循环接缝响度断层与末点电平阶跃，整体集成响度稳定在 `-17.8 LUFS`。
+- **工程包体与资产清理**：
+  - 清理未使用的 `v01` 运行时音频残留（`bgm_village_pastoral_loop_main_v01.ogg*`）；
+  - 新增 `assets/audio/source/.gdignore`，并在 `.gitignore` 与 `export_presets.cfg` 中排除 23 MB 级别原始 `.wav` 母带，保证 Git 仓库与多端安装包轻量整洁；
+  - 收录完整音频生成规范及独立核验回执至 `docs/audio_prompts/`，并在 `tests/TestSuite.gd` 加入 `v02` 音轨及 `v01` 清理回归断言。
+
 ## [1.1.0] - 2026-11-25
 
 ### Added

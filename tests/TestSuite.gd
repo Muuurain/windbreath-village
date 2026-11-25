@@ -55,6 +55,10 @@ func _test_catalog_and_assets() -> void:
 	for pc in GameData.postcards:
 		_assert(ResourceLoader.exists(String(pc["image"])), "Postcard image exists: %s" % pc["id"])
 
+	_assert(ResourceLoader.exists("res://assets/audio/bgm/bgm_village_pastoral_loop_main_v02.ogg"), "Updated v02 pastoral BGM OGG exists")
+	_assert(not ResourceLoader.exists("res://assets/audio/bgm/bgm_village_pastoral_loop_main_v01.ogg"), "Unused v01 BGM runtime file removed")
+	_assert(AudioManager._bgm_player != null and AudioManager._bgm_player.stream != null, "AudioManager loads active v02 BGM stream")
+
 
 func _test_hex_math_and_rotation() -> void:
 	for i in range(6):

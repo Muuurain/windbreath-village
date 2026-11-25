@@ -20,6 +20,9 @@ build/*.zip
 assets/art/raw/*.png
 assets/art/raw/*.jpg
 
+# Uncompressed master audio (kept locally; excluded from packages and VCS)
+assets/audio/source/
+
 # Python caches
 __pycache__/
 *.py[cod]

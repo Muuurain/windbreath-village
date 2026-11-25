@@ -1,6 +1,6 @@
 extends Node
 ## Gentle pastoral multi-layer audio manager:
-## pastoral kalimba BGM + brook ambient + optional rain-chime layer + pooled UI/tile SFX.
+## acoustic chamber BGM (v02) + brook ambient + optional rain-chime layer + pooled UI/tile SFX.
 
 const SFX_POOL_SIZE := 8
 
@@ -57,8 +57,12 @@ func _set_paused(p: bool) -> void:
 
 
 func _start_ambient_loops() -> void:
-	if ResourceLoader.exists("res://assets/audio/bgm/bgm_pastoral_loop.ogg"):
-		var s1 := load("res://assets/audio/bgm/bgm_pastoral_loop.ogg")
+	# Prefer the smoothed 80s pastoral v02 master; fall back to the legacy 16s synth loop.
+	var bgm_path := "res://assets/audio/bgm/bgm_village_pastoral_loop_main_v02.ogg"
+	if not ResourceLoader.exists(bgm_path):
+		bgm_path = "res://assets/audio/bgm/bgm_pastoral_loop.ogg"
+	if ResourceLoader.exists(bgm_path):
+		var s1 := load(bgm_path)
 		if s1 is AudioStreamOggVorbis:
 			(s1 as AudioStreamOggVorbis).loop = true
 		_bgm_player.stream = s1
